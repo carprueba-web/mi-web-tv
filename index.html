@@ -2,20 +2,96 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Web TV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web TV Player</title>
     <style>
-        /* ESTILOS (CSS) - El diseño visual */
+        /* --- ESTILOS GENERALES --- */
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212; /* Fondo oscuro */
+            background-color: #0a0a0a;
             color: white;
-            display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Menú Lateral */
+        /* --- PANTALLA DE LOGIN --- */
+        #login-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background-color: rgba(0, 0, 0, 0.85);
+            padding: 40px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: #e50914;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            color: #aaa;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            box-sizing: border-box; /* Para que el padding no rompa el ancho */
+        }
+
+        .btn-login {
+            background-color: #e50914;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: #f40612;
+        }
+
+        /* --- INTERFAZ DEL REPRODUCTOR (Oculta al inicio) --- */
+        #app-interface {
+            display: none; /* Se oculta hasta loguearse */
+            display: flex;
+            height: 100vh;
+        }
+
         .sidebar {
             width: 250px;
             background-color: #1f1f1f;
@@ -23,106 +99,141 @@
             flex-direction: column;
             border-right: 1px solid #333;
         }
-        .logo {
-            padding: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #e50914; /* Rojo estilo Netflix */
-            text-align: center;
-        }
-        .menu-item {
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .menu-item:hover {
-            background-color: #333;
-        }
-        .menu-item.active {
-            background-color: #e50914;
-            font-weight: bold;
-        }
-
-        /* Área Principal */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Reproductor de Video */
-        .video-player-container {
-            background-color: black;
-            height: 60%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        .video-placeholder {
-            text-align: center;
-            color: #777;
-        }
         
-        /* Lista de Canales / Videos */
-        .channel-list {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: #181818;
+        .user-info {
+            padding: 15px;
+            background-color: #111;
+            font-size: 12px;
+            color: #aaa;
+            border-bottom: 1px solid #333;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        .card {
-            background-color: #2a2a2a;
-            height: 100px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+
+        .logo { padding: 20px; font-size: 24px; font-weight: bold; color: #e50914; text-align: center; }
+        .menu-item { padding: 15px 20px; cursor: pointer; transition: background 0.3s; }
+        .menu-item:hover { background-color: #333; }
+        .menu-item.active { background-color: #e50914; font-weight: bold; }
+        
+        /* Botón de Salir */
+        .logout-btn {
+            margin-top: auto;
+            padding: 15px;
+            background-color: #333;
+            text-align: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            font-size: 14px;
         }
-        .card:hover {
-            transform: scale(1.05);
-            background-color: #3a3a3a;
-        }
+        .logout-btn:hover { background-color: #444; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .video-player-container { background-color: black; height: 60%; display: flex; justify-content: center; align-items: center; }
+        .channel-list { flex: 1; padding: 20px; overflow-y: auto; background-color: #181818; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .card { background-color: #2a2a2a; height: 100px; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s; }
+        .card:hover { transform: scale(1.05); background-color: #3a3a3a; }
+        
+        /* Utilidad para ocultar cosas */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="logo">EDTV CLONE</div>
-        <div class="menu-item active">📺 TV en Vivo</div>
-        <div class="menu-item">🎬 Películas</div>
-        <div class="menu-item">📅 Series</div>
-        <div class="menu-item">⚙️ Configuración</div>
-    </div>
-
-    <div class="main-content">
-        <div class="video-player-container">
-            <div class="video-placeholder">
-                <h2>Reproductor de Video</h2>
-                <p>(Aquí iría la señal de streaming)</p>
-                <button style="padding: 10px 20px; cursor: pointer;">▶ Reproducir</button>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>SPORTIFI TV LOGIN</h2>
+            <div class="input-group">
+                <label>Servidor DNS (Host)</label>
+                <input type="text" id="dns" placeholder="http://ejemplo.com:8080">
             </div>
-        </div>
-
-        <div class="channel-list">
-            <h3>Canales Recomendados</h3>
-            <div class="grid">
-                <div class="card">Canal 1</div>
-                <div class="card">Canal 2</div>
-                <div class="card">Canal 3</div>
-                <div class="card">Deportes</div>
-                <div class="card">Noticias</div>
-                <div class="card">Cine</div>
+            <div class="input-group">
+                <label>Usuario</label>
+                <input type="text" id="username" placeholder="Tu usuario">
             </div>
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="Tu contraseña">
+            </div>
+            <button class="btn-login" onclick="login()">ENTRAR</button>
+            <p id="error-msg" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Faltan datos</p>
         </div>
     </div>
+
+    <div id="app-interface" class="hidden">
+        <div class="sidebar">
+            <div class="logo">SPORTIFI TV</div>
+            <div class="user-info" id="display-user">Usuario: ---</div>
+            <div class="menu-item active">📺 TV en Vivo</div>
+            <div class="menu-item">🎬 Películas</div>
+            <div class="menu-item">📅 Series</div>
+            <div class="logout-btn" onclick="logout()">Cerrar Sesión</div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-player-container">
+                <div style="text-align: center; color: #777;">
+                    <h2>Reproductor</h2>
+                    <p>Selecciona un contenido</p>
+                </div>
+            </div>
+
+            <div class="channel-list">
+                <h3>Contenido Reciente</h3>
+                <div class="grid">
+                    <div class="card">FOX SPORTS</div>
+                    <div class="card">ESPN</div>
+                    <div class="card">HBO</div>
+                    <div class="card">CINEMA</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE JAVASCRIPT ---
+
+        // 1. Verificar si ya está logueado al cargar la página
+        window.onload = function() {
+            const savedUser = localStorage.getItem('xtream_user');
+            if (savedUser) {
+                showInterface(savedUser);
+            }
+        };
+
+        // 2. Función de Login
+        function login() {
+            const dns = document.getElementById('dns').value;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            if (dns === "" || user === "" || pass === "") {
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            // Aquí guardamos los datos en el navegador (Local Storage)
+            // NOTA: Esto simula el login. En una app real, aquí harías una petición fetch() al servidor.
+            localStorage.setItem('xtream_dns', dns);
+            localStorage.setItem('xtream_user', user);
+            localStorage.setItem('xtream_pass', pass);
+
+            showInterface(user);
+        }
+
+        // 3. Mostrar la interfaz y ocultar login
+        function showInterface(username) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            document.getElementById('display-user').innerText = "Usuario: " + username;
+        }
+
+        // 4. Cerrar Sesión
+        function logout() {
+            localStorage.removeItem('xtream_dns');
+            localStorage.removeItem('xtream_user');
+            localStorage.removeItem('xtream_pass');
+            location.reload(); // Recargar página para volver al login
+        }
+    </script>
 
 </body>
 </html>
